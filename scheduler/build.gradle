@@ -1,0 +1,19 @@
+dependencies {
+    // PostgreSQL (для чтения users)
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    runtimeOnly 'org.postgresql:postgresql'
+
+    // MongoDB (для чтения tasks)
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+
+    // Kafka
+    implementation 'org.springframework.kafka:spring-kafka'
+
+    // Scheduler
+    implementation 'org.springframework.boot:spring-boot-starter'
+}
+
+bootJar {
+    enabled = true
+    archiveFileName = 'scheduler.jar'
+}

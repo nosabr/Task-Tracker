@@ -1,0 +1,8 @@
+rootProject.name = 'Task-Tracker'
+
+// Подключаем все модули
+include 'auth-service'
+include 'task-service'
+include 'email-sender'
+include 'scheduler'
+include 'api-gateway'
