@@ -7,19 +7,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class RegisterRequest {
+public record RegisterRequest (
+        @NotBlank(message = "Email is required")
+        @Email(message = "Email should be valid")
+        String email,
 
-    @NotBlank(message = "Email is required")
-    @Email(message = "Email should be valid")
-    private String email;
+        @NotBlank(message = "Password is required")
+        @Size(min = 6, max = 100, message = "Password must be between 6 and 100 characters")
+        String password,
 
-    @NotBlank(message = "Password is required")
-    @Size(min = 6, max = 100, message = "Password must be between 6 and 100 characters")
-    private String password;
-
-    @NotBlank(message = "Password confirmation is required")
-    private String confirmPassword;
-}
+        @NotBlank(message = "Password confirmation is required")
+        String confirmPassword
+) {}

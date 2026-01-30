@@ -8,16 +8,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class UserResponse {
-
-    private Long id;
-    private String email;
-    private Boolean enabled;
-    private LocalDateTime createdAt;
-
-    // Не включаем password!
-}
+public record UserResponse (
+        String email
+) {}
