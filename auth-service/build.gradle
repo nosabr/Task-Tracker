@@ -13,8 +13,8 @@ dependencies {
     runtimeOnly 'org.postgresql:postgresql'
 
     // Flyway (миграции)
-    implementation 'org.flywaydb:flyway-core'
-    runtimeOnly 'org.flywaydb:flyway-database-postgresql'
+    implementation 'org.flywaydb:flyway-core:10.11.0'
+    runtimeOnly 'org.flywaydb:flyway-database-postgresql:10.11.0'
 
     // Kafka
     implementation 'org.springframework.kafka:spring-kafka'

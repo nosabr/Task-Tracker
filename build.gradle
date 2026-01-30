@@ -1,12 +1,9 @@
-// Root build.gradle - общие настройки для всех модулей
-
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.5.10' apply false
+    id 'org.springframework.boot' version '3.2.11' apply false  // ← Изменили с 3.5.10
     id 'io.spring.dependency-management' version '1.1.7' apply false
 }
 
-// Общие настройки для всех подпроектов
 subprojects {
     apply plugin: 'java'
     apply plugin: 'org.springframework.boot'
@@ -25,7 +22,6 @@ subprojects {
         mavenCentral()
     }
 
-    // Общие зависимости для всех модулей
     dependencies {
         implementation 'org.springframework.boot:spring-boot-starter'
         compileOnly 'org.projectlombok:lombok'
@@ -36,5 +32,13 @@ subprojects {
 
     tasks.named('test') {
         useJUnitPlatform()
+    }
+
+    tasks.withType(org.springframework.boot.gradle.tasks.bundling.BootJar) {
+        enabled = true
+    }
+
+    tasks.withType(Jar) {
+        enabled = false
     }
 }
