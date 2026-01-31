@@ -1,6 +1,7 @@
 package com.example.authservice.controller;
 
 import com.example.authservice.dto.LoginRequest;
+import com.example.authservice.dto.RegisterRequest;
 import com.example.authservice.dto.UserResponse;
 import com.example.authservice.entity.User;
 import com.example.authservice.service.AuthService;
@@ -9,6 +10,7 @@ import com.example.authservice.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,7 +38,8 @@ public class AuthController {
     }
 
     @PostMapping("/sign-up")
-    public ResponseEntity<UserResponse> signUp(){
-        return null;
+    public ResponseEntity<UserResponse> signUp(@Valid @RequestParam RegisterRequest request){
+        User user = userService.createUser(request.email(), request.password());
+        return ResponseEntity.status(HttpStatus.CREATED).body(new UserResponse(user.getEmail()));
     }
 }
