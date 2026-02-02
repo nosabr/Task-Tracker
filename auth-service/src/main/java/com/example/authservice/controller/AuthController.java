@@ -25,7 +25,7 @@ public class AuthController {
 
     @PostMapping("/sign-in")
     public ResponseEntity<UserResponse> signIn(@Valid @RequestBody LoginRequest request){
-        log.info("Login attempt: {}, {}", request.email(), request.password());
+        log.info("Login attempt: {}, {}", request.email());
         authService.signIn(request);
         User user = userService.getUserByEmail(request.email());
         String jwtToken = jwtService.generateToken(user);
@@ -35,7 +35,7 @@ public class AuthController {
     }
 
     @PostMapping("/sign-up")
-    public ResponseEntity<UserResponse> signUp(@Valid @RequestParam RegisterRequest request){
+    public ResponseEntity<UserResponse> signUp(@Valid @RequestBody RegisterRequest request){
         User user = userService.createUser(request.email(), request.password());
         return ResponseEntity.status(HttpStatus.CREATED).body(new UserResponse(user.getEmail()));
     }

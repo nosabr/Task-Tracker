@@ -36,7 +36,7 @@ public class UserService {
         user.setEmail(email);
         user.setPassword(passwordEncoder.encode(password));
         user =  userRepository.save(user);
-        kafkaTemplate.send("user-events", new UserRegisterEvent(user.getEmail()));
+        //kafkaTemplate.send("user-events", new UserRegisterEvent(user.getEmail()));
         return user;
     }
 }
