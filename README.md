@@ -1,6 +1,7 @@
 auth-service:
     /api/auth/sign-in
     /api/auth/sign-up -> email notification
+    /api/auth/sign-out -> clear cookies and add token to redis blacklist
     /api/user/me
     Entities: 
         User: id, email, password
