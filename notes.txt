@@ -1,0 +1,22 @@
+03.02
+Ситуация:
+В методе регистрации пользователя, должны отправлять кафке сообытие о реге пользователя,
+кафка должна отправлять сообщение сервису отправке емейлов.
+Но если кафка лежит, сервис уйдет в бесконечный таймаут.
+Есть несколько вариантов решений:
+1. Асихнронное выполнение с completableFuture:
+    CompletableFuture<SendResult<String, Object>> future =
+        kafkaTemplate.send("user-events", new UserRegisterEvent(user.getEmail()));
+
+    future.whenComplete((result, ex) -> {
+        if (ex == null) {
+            log.info("Event published successfully");
+        } else {
+            log.error("Failed to publish event: {}", ex.getMessage());
+            // НЕ падаем, просто логируем
+        }
+    });
+2. обычный try catch, с добавлением времени максимального таймаута кафки в properties
+3. Circuit breaker, отдельная библиотека, указываем кол-во макс попыток для кафки, потом пауза, и снова попытка отправить
+4. Outbox Pattern - создаем отдельную таблицу для событий, из таблицы будем отправлять в кафку.
+Для себя выбрал реализовать OutboxPattern, так как часто слышал про него на собесах
