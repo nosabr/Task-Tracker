@@ -21,6 +21,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final OutboxEventService outboxEventService;
 
     public User getUserByEmail(String email){
         return userRepository.findByEmail(email).orElseThrow(
@@ -32,11 +33,15 @@ public class UserService {
         if(userRepository.findByEmail(email).isPresent()){
             throw new UserAlreadyExistsException("User already exists: " + email);
         }
-        User user = new User();
-        user.setEmail(email);
-        user.setPassword(passwordEncoder.encode(password));
+
+        User user = User.builder()
+                .email(email)
+                .password(passwordEncoder.encode(password))
+                .build();
+
         user =  userRepository.save(user);
-        //kafkaTemplate.send("user-events", new UserRegisterEvent(user.getEmail()));
+        UserRegisterEvent event = new UserRegisterEvent(user.getEmail());
+        outboxEventService.createOutboxEvent(user, event);
         return user;
     }
 }
