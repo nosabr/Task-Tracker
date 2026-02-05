@@ -2,6 +2,8 @@ package com.example.authservice.service;
 
 import com.example.authservice.entity.EventType;
 import com.example.authservice.entity.OutboxEvent;
+import com.example.authservice.entity.User;
+import com.example.authservice.event.UserRegisterEvent;
 import com.example.authservice.repository.OutboxEventRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,11 +19,11 @@ public class OutboxEventService {
     private final OutboxEventRepository outboxRepository;
     private final ObjectMapper objectMapper;
 
-    public void saveEvent(EventType type, Long aggregateId, Object event) {
+    public void createOutboxEvent(User user, UserRegisterEvent event) {
         try {
             OutboxEvent outboxEvent = OutboxEvent.builder()
-                    .eventType(type)
-                    .aggregateId(aggregateId)
+                    .eventType(EventType.USER_REGISTERED)
+                    .aggregateId(user.getId())
                     .payload(objectMapper.writeValueAsString(event))
                     .sent(false)
                     .build();
