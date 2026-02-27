@@ -1,0 +1,51 @@
+## API Design
+
+### Auth Service `localhost:8081`
+
+**POST** `/api/auth/register`
+Регистрация нового пользователя. Принимает email и пароль, возвращает JWT токен.
+
+**POST** `/api/auth/login`
+Вход в систему. Принимает email и пароль, возвращает JWT токен.
+
+---
+
+### Task Service `localhost:8082`
+
+**POST** `/api/tasks`
+Создать новую задачу. Принимает title, description, priority, tags, dueDate. userId берётся из JWT токена автоматически.
+
+**GET** `/api/tasks`
+Получить все задачи текущего пользователя. userId берётся из JWT токена.
+
+**GET** `/api/tasks/{id}`
+Получить конкретную задачу по ID. Возвращает 403 если задача принадлежит другому пользователю.
+
+**PUT** `/api/tasks/{id}`
+Полностью обновить задачу. Принимает все поля — title, description, status, priority, tags, dueDate.
+
+**DELETE** `/api/tasks/{id}`
+Удалить задачу. Возвращает 403 если задача принадлежит другому пользователю.
+
+**PATCH** `/api/tasks/{id}/complete`
+Отметить задачу как выполненную. Проставляет status = COMPLETED и completedAt = now().
+
+**PATCH** `/api/tasks/{id}/incomplete`
+Отметить задачу как невыполненную. Проставляет status = IN progress.
+
+---
+
+### API Gateway `localhost:8080`
+
+Единая точка входа. Все запросы идут через gateway, он проксирует их в нужный сервис. Клиент никогда не обращается напрямую к auth-service или task-service.
+
+**`/api/auth/**`** → проксирует в auth-service
+**`/api/tasks/**`** → проксирует в task-service
+
+---
+
+### Kafka события (внутренние, не HTTP)
+
+**`user-registered`** — публикует auth-service когда пользователь зарегистрировался. email-sender слушает и отправляет приветственное письмо.
+
+**`task-completed`** — публикует task-service когда задача выполнена. email-sender слушает и отправляет уведомление.

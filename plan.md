@@ -67,16 +67,16 @@
 ## 🎯 Milestone 2: Task Service
 
 ### 2.1 Task Service - База
-- [ ] Создать структуру модуля task-service
-- [ ] Настроить application.yml (MongoDB, Kafka, Auth Service URL)
-- [ ] Создать Document Task (MongoDB entity)
-- [ ] Создать TaskRepository (MongoRepository)
+- [x] Создать структуру модуля task-service
+- [x] Настроить application.yml (MongoDB, Kafka, Auth Service URL)
+- [x] Создать Document Task (MongoDB entity)
+- [x] Создать TaskRepository (MongoRepository)
 
 ### 2.2 Task Service - DTO
-- [ ] Создать CreateTaskRequest (title, description с валидацией)
-- [ ] Создать UpdateTaskRequest
-- [ ] Создать TaskResponse
-- [ ] Создать ErrorResponse (аналогично Auth Service)
+- [x] Создать CreateTaskRequest (title, description с валидацией)
+- [x] Создать UpdateTaskRequest
+- [x] Создать TaskResponse
+- [x] Создать ErrorResponse (аналогично Auth Service)
 
 ### 2.3 Task Service - Exceptions
 - [ ] Создать TaskNotFoundException
@@ -85,10 +85,10 @@
 - [ ] Создать GlobalExceptionHandler
 
 ### 2.4 Task Service - JWT Integration
-- [ ] Создать AuthClientService (вызов Auth Service для валидации JWT)
-- [ ] Создать JwtAuthenticationFilter (вызывает Auth Service)
-- [ ] Настроить SecurityConfig
-- [ ] Обработка ошибок при недоступности Auth Service
+- [x] Создать AuthClientService (вызов Auth Service для валидации JWT)
+- [x] Создать JwtAuthenticationFilter (вызывает Auth Service)
+- [x] Настроить SecurityConfig
+- [x] Обработка ошибок при недоступности Auth Service
 
 ### 2.5 Task Service - Business Logic
 - [ ] Создать TaskService (CRUD операции)

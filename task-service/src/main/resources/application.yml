@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: task-service
+
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/task_db
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: task-service-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+server:
+  port: 8082
+
+# JWT ?????? ? ?????? ????????? ? auth-service!
+jwt:
+  secret: mySecretKeyForJWTTokenGenerationAndValidation123456789
+
+# URL auth-service (??? ???????? ?????????????, ???? ??????????? HTTP-?????????)
+services:
+  auth-url: http://localhost:8081
