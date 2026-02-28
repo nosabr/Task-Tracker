@@ -1,0 +1,20 @@
+package com.example.emailsender.dto;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import java.util.List;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+public record DailyReportEvent(
+        String email,
+        String username,
+        List<TaskInfo> tasks
+) {
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record TaskInfo(
+            String id,
+            String title,
+            String description,
+            String status  // TaskStatus.name() → "IN_PROGRESS", "DONE" etc.
+    ) {}
+}
