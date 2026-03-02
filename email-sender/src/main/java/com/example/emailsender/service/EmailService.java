@@ -22,16 +22,16 @@ public class EmailService {
     @Value("${spring.mail.username}")
     private String fromEmail;
 
-    public void sendWelcomeEmail(String to, String username) {
+    public void sendWelcomeEmail(String to) {
         String subject = "Welcome to Task Tracker!";
-        String body = buildWelcomeEmailBody(username);
+        String body = buildWelcomeEmailBody(to);
         sendHtmlEmail(to, subject, body);
         log.info("Welcome email sent to: {}", to);
     }
 
-    public void sendDailyReport(String to, String username, List<DailyReportEvent.TaskInfo> tasks) {
+    public void sendDailyReport(String to, List<DailyReportEvent.TaskInfo> tasks) {
         String subject = "Your Daily Task Report";
-        String body = buildDailyReportBody(username, tasks);
+        String body = buildDailyReportBody(to, tasks);
         sendHtmlEmail(to, subject, body);
         log.info("Daily report sent to: {} with {} tasks", to, tasks.size());
     }
@@ -51,7 +51,7 @@ public class EmailService {
         }
     }
 
-    private String buildWelcomeEmailBody(String username) {
+    private String buildWelcomeEmailBody(String email) {
         return """
                 <html>
                 <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -63,10 +63,10 @@ public class EmailService {
                     <p>Best regards,<br>Task Tracker Team</p>
                 </body>
                 </html>
-                """.formatted(username);
+                """.formatted(email);
     }
 
-    private String buildDailyReportBody(String username, List<DailyReportEvent.TaskInfo> tasks) {
+    private String buildDailyReportBody(String email, List<DailyReportEvent.TaskInfo> tasks) {
         StringBuilder taskRows = new StringBuilder();
 
         if (tasks.isEmpty()) {
@@ -110,6 +110,6 @@ public class EmailService {
                     <p>Best regards,<br>Task Tracker Team</p>
                 </body>
                 </html>
-                """.formatted(username, taskRows);
+                """.formatted(email, taskRows);
     }
 }

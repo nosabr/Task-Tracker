@@ -5,6 +5,5 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record UserRegisteredEvent(
         Long userId,
-        String email,
-        String username
+        String email
 ) {}

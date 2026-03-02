@@ -23,7 +23,7 @@ public class UserEventListener {
     public void handleUserRegistered(UserRegisteredEvent event) {
         log.info("Received UserRegisteredEvent for userId={}, email={}", event.userId(), event.email());
         try {
-            emailService.sendWelcomeEmail(event.email(), event.username());
+            emailService.sendWelcomeEmail(event.email());
         } catch (Exception e) {
             log.error("Failed to process UserRegisteredEvent for {}: {}", event.email(), e.getMessage());
         }

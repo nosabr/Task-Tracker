@@ -18,16 +18,18 @@ public class TaskMapper {
                 task.getDescription(),
                 task.getStatus().toString(),
                 task.getUserId(),
+                task.getEmail(),
                 task.getCreatedDate(),
                 task.getUpdatedDate()
         );
     }
 
-    public Task toDocument(CreateTaskRequest request, Long userId) {
+    public Task toDocument(CreateTaskRequest request, Long userId, String email) {
         return Task.builder()
                 .title(request.title())
                 .description(request.description())
                 .userId(userId)
+                .email(email)
                 .build();
     }
 }

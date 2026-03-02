@@ -31,9 +31,10 @@ public class TaskController {
     @PostMapping
     public ResponseEntity<TaskResponse> createTask(
             @Valid @RequestBody CreateTaskRequest request,
-            @RequestHeader("X-User-Id") Long userId) {
+            @RequestHeader("X-User-Id") Long userId,
+            @RequestHeader("X-User-Email")  String email) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(taskService.createTask(request, userId));
+                .body(taskService.createTask(request, userId, email));
     }
 
     @PutMapping("/{id}")

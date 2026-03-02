@@ -22,7 +22,7 @@ public class TaskEventListener {
     public void handleDailyReport(DailyReportEvent event) {
         log.info("Received DailyReportEvent for email={}, tasks={}", event.email(), event.tasks().size());
         try {
-            emailService.sendDailyReport(event.email(), event.username(), event.tasks());
+            emailService.sendDailyReport(event.email(), event.tasks());
         } catch (Exception e) {
             log.error("Failed to process DailyReportEvent for {}: {}", event.email(), e.getMessage());
         }

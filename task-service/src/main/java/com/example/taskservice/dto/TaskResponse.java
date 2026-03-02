@@ -8,6 +8,7 @@ public record TaskResponse(
         String description,
         String status,
         Long userId,
+        String email,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {

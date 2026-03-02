@@ -7,7 +7,6 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record DailyReportEvent(
         String email,
-        String username,
         List<TaskInfo> tasks
 ) {
     @JsonIgnoreProperties(ignoreUnknown = true)

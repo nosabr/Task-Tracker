@@ -29,8 +29,8 @@ public class TaskService {
                 orElseThrow(() -> new TaskNotFoundException("Task not Found: " + id));
     }
 
-    public TaskResponse createTask(CreateTaskRequest request, Long userId) {
-        Task saved = taskRepository.save(taskMapper.toDocument(request, userId));
+    public TaskResponse createTask(CreateTaskRequest request, Long userId, String email) {
+        Task saved = taskRepository.save(taskMapper.toDocument(request, userId,  email));
         return taskMapper.toTaskResponse(saved);
     }
 
@@ -63,5 +63,12 @@ public class TaskService {
         task.setStatus(TaskStatus.IN_PROGRESS);
         Task saved = taskRepository.save(task);
         return taskMapper.toTaskResponse(saved);
+    }
+
+    public List<TaskResponse> getAllTasks() {
+        return taskRepository.findAll()
+                .stream()
+                .map(taskMapper::toTaskResponse)
+                .toList();
     }
 }

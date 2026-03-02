@@ -29,6 +29,8 @@ public class Task {
     @Indexed
     private Long userId;
 
+    private String email;
+
     @CreatedDate
     private LocalDateTime createdDate;
 
