@@ -16,14 +16,14 @@ spring:
             - SetStatus=404
 
         - id: auth-service
-          uri: http://localhost:8081
+          uri: ${AUTH_SERVICE_URL:http://localhost:8081}
           predicates:
             - Path=/auth/**
           filters:
             - StripPrefix=0
 
         - id: task-service
-          uri: http://localhost:8082
+          uri: ${TASK_SERVICE_URL:http://localhost:8082}
           predicates:
             - Path=/tasks/**
           filters:
@@ -50,4 +50,4 @@ spring:
 application:
   security:
     jwt:
-      secret-key: mySecretKeyForJWTTokenGenerationAndValidation123456789
+      secret-key: ${JWT_SECRET:mySecretKeyForJWTTokenGenerationAndValidation123456789}

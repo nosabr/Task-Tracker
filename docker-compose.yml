@@ -27,7 +27,7 @@ services:
     networks:
       - tasktracker-network
 
-  # Zookeeper (нужен для Kafka)
+  # Zookeeper
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
     container_name: zookeeper
@@ -48,8 +48,94 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    networks:
+      - tasktracker-network
+
+  # Auth Service
+  auth-service:
+    build:
+      context: .
+      dockerfile: auth-service/Dockerfile
+    container_name: auth-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/auth_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      JWT_SECRET: ${JWT_SECRET}
+    ports:
+      - "8081:8081"
+    depends_on:
+      - postgres
+      - kafka
+    networks:
+      - tasktracker-network
+
+  # Task Service
+  task-service:
+    build:
+      context: .
+      dockerfile: task-service/Dockerfile
+    container_name: task-service
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/task_db
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      JWT_SECRET: ${JWT_SECRET}
+    ports:
+      - "8082:8082"
+    depends_on:
+      - mongodb
+      - kafka
+    networks:
+      - tasktracker-network
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
+    container_name: api-gateway
+    environment:
+      AUTH_SERVICE_URL: http://auth-service:8081
+      TASK_SERVICE_URL: http://task-service:8082
+      JWT_SECRET: ${JWT_SECRET}
+    ports:
+      - "8080:8080"
+    depends_on:
+      - auth-service
+      - task-service
+    networks:
+      - tasktracker-network
+
+  # Email Sender
+  email-sender:
+    build:
+      context: .
+      dockerfile: email-sender/Dockerfile
+    container_name: email-sender
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      MAIL_USERNAME: ${MAILJET_API_KEY}
+      MAIL_PASSWORD: ${MAILJET_API_SECRET}
+    depends_on:
+      - kafka
+    networks:
+      - tasktracker-network
+
+  # Scheduler
+  scheduler:
+    build:
+      context: .
+      dockerfile: scheduler/Dockerfile
+    container_name: scheduler
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      TASK_SERVICE_URL: http://task-service:8082
+    depends_on:
+      - kafka
+      - task-service
     networks:
       - tasktracker-network
 

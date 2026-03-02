@@ -4,10 +4,10 @@ spring:
 
   data:
     mongodb:
-      uri: mongodb://localhost:27017/task_db
+      uri: ${SPRING_DATA_MONGODB_URI:mongodb://localhost:27017/task_db}
 
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     consumer:
       group-id: task-service-group
       auto-offset-reset: earliest
@@ -22,10 +22,26 @@ spring:
 server:
   port: 8082
 
-# JWT ?????? ? ?????? ????????? ? auth-service!
 jwt:
-  secret: mySecretKeyForJWTTokenGenerationAndValidation123456789
+  secret: ${JWT_SECRET:mySecretKeyForJWTTokenGenerationAndValidation123456789}
 
-# URL auth-service (??? ???????? ?????????????, ???? ??????????? HTTP-?????????)
 services:
-  auth-url: http://localhost:8081
+  auth-url: ${AUTH_SERVICE_URL:http://localhost:8081}
+
+logging:
+  level:
+    com.example: DEBUG
+
+    # MongoDB
+    org.springframework.data.mongodb: WARN
+    org.mongodb.driver: WARN
+
+    # Kafka
+    org.springframework.kafka: WARN
+    org.apache.kafka: WARN
+
+    # Security/JWT
+    org.springframework.security: WARN
+    org.springframework.web: WARN
+
+    root: WARN

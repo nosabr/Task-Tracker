@@ -5,46 +5,46 @@ spring:
   application:
     name: auth-service
 
-  # PostgreSQL
   datasource:
-    url: jdbc:postgresql://localhost:5432/auth_db
-    username: postgres
-    password: postgres
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/auth_db}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
 
-  # JPA / Hibernate
   jpa:
     hibernate:
-      ddl-auto: none  # Flyway ????????? ??????
-    show-sql: true
+      ddl-auto: none
+    show-sql: false
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
 
-  # Flyway ????????
   flyway:
     enabled: true
     locations: classpath:db/migration
     baseline-on-migrate: true
 
-  # Kafka
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
         spring.json.add.type.headers: false
 
-# JWT ?????????
 jwt:
-  secret: mySecretKeyForJWTTokenGenerationAndValidation123456789
-  expiration: 86400000  # 24 ???? ? ?????????????
+  secret: ${JWT_SECRET:mySecretKeyForJWTTokenGenerationAndValidation123456789}
+  expiration: 86400000
 
-# ???????????
 logging:
   level:
     com.tasktracker.auth: DEBUG
-    org.springframework.security: DEBUG
-    org.hibernate.SQL: DEBUG
+    org.springframework: WARN
+    org.springframework.security: INFO      # перезапишет DEBUG выше, если хочешь меньше Security логов
+    org.hibernate: WARN
+    org.hibernate.SQL: DEBUG                # но SQL оставить
+    org.hibernate.orm.jdbc.bind: WARN       # убрать bind parameters спам
+    org.apache.kafka: WARN
+    io.netty: WARN
+    root: WARN

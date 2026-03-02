@@ -20,5 +20,8 @@ spring:
 
 logging:
   level:
-    com.tasktracker: DEBUG
-    org.springframework.kafka: INFO
+    com.example: DEBUG
+    org.springframework.kafka: WARN
+    org.apache.kafka: WARN
+    org.springframework.mail: WARN
+    root: WARN

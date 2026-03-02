@@ -36,9 +36,7 @@ subprojects {
 
     tasks.withType(org.springframework.boot.gradle.tasks.bundling.BootJar) {
         enabled = true
+        archiveFileName = "${project.name}.jar"
     }
 
-    tasks.withType(Jar) {
-        enabled = false
-    }
 }

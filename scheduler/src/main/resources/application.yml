@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: scheduler
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+
+services:
+  task-service:
+    url: ${TASK_SERVICE_URL:http://localhost:8082}
+
+scheduler:
+  daily-report:
+    cron: ${DAILY_REPORT_CRON:0 0 8 * * *}  # ?????? ???? ? 08:00
+
+logging:
+  level:
+    com.example: DEBUG
+
+    # подавить шум
+    org.springframework.kafka: WARN
+    org.apache.kafka: WARN
+    org.springframework.web: WARN        # HttpClient логи при вызове task-service
+    org.springframework: WARN
+    root: WARN
