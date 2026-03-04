@@ -139,6 +139,19 @@ services:
     networks:
       - tasktracker-network
 
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - api-gateway
+    restart: unless-stopped
+    networks:
+      - tasktracker-network
+
 volumes:
   postgres_data:
   mongodb_data:

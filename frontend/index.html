@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TASKFLOW</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --surface: #111118;
+            --surface2: #1a1a24;
+            --border: #2a2a38;
+            --accent: #6c63ff;
+            --accent2: #ff6b6b;
+            --accent3: #43e8b0;
+            --text: #e8e8f0;
+            --muted: #6b6b80;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* ─── AUTH PAGE ─── */
+        #auth-page {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .auth-glow {
+            position: absolute;
+            width: 600px; height: 600px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(108,99,255,0.12) 0%, transparent 70%);
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+        .auth-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 48px;
+            width: 420px;
+            position: relative;
+            animation: fadeUp 0.5s ease;
+        }
+
+        .auth-card::before {
+            content: '';
+            position: absolute;
+            top: -1px; left: 30px; right: 30px; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            border-radius: 2px;
+        }
+
+        .auth-logo {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 28px;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+        }
+
+        .auth-logo span { color: var(--accent); }
+        .auth-subtitle { color: var(--muted); font-size: 14px; margin-bottom: 36px; }
+
+        .tab-switch {
+            display: flex;
+            background: var(--bg);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 28px;
+            border: 1px solid var(--border);
+        }
+
+        .tab-btn {
+            flex: 1; padding: 10px; border: none;
+            background: transparent; color: var(--muted);
+            font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+            cursor: pointer; border-radius: 9px; transition: all 0.25s;
+        }
+
+        .tab-btn.active {
+            background: var(--surface2); color: var(--text);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .form-group { margin-bottom: 18px; }
+
+        .form-label {
+            display: block; font-size: 12px; font-weight: 500;
+            color: var(--muted); margin-bottom: 8px;
+            letter-spacing: 0.5px; text-transform: uppercase;
+        }
+
+        .form-input {
+            width: 100%; padding: 12px 16px;
+            background: var(--bg); border: 1px solid var(--border);
+            border-radius: 12px; color: var(--text);
+            font-family: 'DM Sans', sans-serif; font-size: 15px;
+            outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(108,99,255,0.15);
+        }
+
+        .btn-primary {
+            width: 100%; padding: 14px;
+            background: var(--accent); color: #fff; border: none;
+            border-radius: 12px; font-family: 'Syne', sans-serif;
+            font-weight: 700; font-size: 15px; cursor: pointer;
+            letter-spacing: 0.5px; transition: all 0.2s; margin-top: 8px;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #7c74ff; transform: translateY(-1px);
+            box-shadow: 0 8px 24px rgba(108,99,255,0.35);
+        }
+
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .error-msg {
+            color: var(--accent2); font-size: 13px;
+            margin-top: 10px; text-align: center; display: none;
+            animation: fadeUp 0.2s ease;
+        }
+
+        .error-msg.show { display: block; }
+
+        /* ─── HOME PAGE ─── */
+        #home-page { display: none; min-height: 100vh; flex-direction: column; }
+
+        header {
+            display: flex; align-items: center; gap: 16px;
+            padding: 0 32px; height: 64px;
+            background: rgba(10,10,15,0.8); backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            position: sticky; top: 0; z-index: 100;
+        }
+
+        .header-logo {
+            font-family: 'Syne', sans-serif; font-weight: 800;
+            font-size: 20px; letter-spacing: -0.5px; flex: 1;
+        }
+
+        .header-logo span { color: var(--accent); }
+
+        .header-user {
+            display: flex; align-items: center; gap: 8px;
+            color: var(--muted); font-size: 14px;
+        }
+
+        .avatar {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), #a78bfa);
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Syne', sans-serif; font-weight: 700;
+            font-size: 13px; color: #fff;
+        }
+
+        .btn-new-task {
+            display: flex; align-items: center; gap: 8px;
+            padding: 8px 18px; background: var(--accent); color: #fff;
+            border: none; border-radius: 10px;
+            font-family: 'DM Sans', sans-serif; font-weight: 500; font-size: 14px;
+            cursor: pointer; transition: all 0.2s;
+        }
+
+        .btn-new-task:hover {
+            background: #7c74ff; transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(108,99,255,0.3);
+        }
+
+        .btn-logout {
+            padding: 8px 16px; background: transparent;
+            border: 1px solid var(--border); border-radius: 10px;
+            color: var(--muted); font-family: 'DM Sans', sans-serif;
+            font-size: 14px; cursor: pointer; transition: all 0.2s;
+        }
+
+        .btn-logout:hover { border-color: var(--accent2); color: var(--accent2); }
+
+        .board {
+            display: grid; grid-template-columns: 1fr 1fr;
+            flex: 1;
+        }
+
+        .column {
+            padding: 32px;
+            min-height: calc(100vh - 64px);
+        }
+
+        .column:first-child { border-right: 1px solid var(--border); }
+
+        .column-header {
+            display: flex; align-items: center;
+            gap: 12px; margin-bottom: 28px;
+        }
+
+        .column-title {
+            font-family: 'Syne', sans-serif; font-weight: 700;
+            font-size: 18px; letter-spacing: -0.3px;
+        }
+
+        .column-count {
+            background: var(--surface2); border: 1px solid var(--border);
+            border-radius: 8px; padding: 2px 10px;
+            font-size: 12px; color: var(--muted); font-weight: 600;
+        }
+
+        .column-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        .active-dot { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+        .done-dot { background: var(--accent3); box-shadow: 0 0 8px var(--accent3); }
+
+        .task-list { display: flex; flex-direction: column; gap: 12px; }
+
+        .task-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 16px; padding: 18px 20px;
+            position: relative; transition: all 0.25s;
+            animation: fadeUp 0.3s ease;
+        }
+
+        .task-card:hover {
+            border-color: var(--accent); transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px rgba(108,99,255,0.2);
+        }
+
+        .task-card.done { background: #0f1a14; border-color: #1a3a28; opacity: 0.75; }
+
+        .task-card.done:hover {
+            border-color: var(--accent3); opacity: 1;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px rgba(67,232,176,0.2);
+        }
+
+        .task-actions {
+            position: absolute; top: 14px; right: 14px;
+            display: flex; gap: 6px;
+            opacity: 0; transform: translateY(4px);
+            transition: all 0.2s; pointer-events: none;
+        }
+
+        .task-card:hover .task-actions { opacity: 1; transform: translateY(0); pointer-events: all; }
+
+        .action-btn {
+            padding: 6px 12px; border: none; border-radius: 8px;
+            font-family: 'DM Sans', sans-serif; font-size: 12px;
+            font-weight: 500; cursor: pointer; transition: all 0.15s;
+        }
+
+        .btn-complete { background: rgba(67,232,176,0.15); color: var(--accent3); border: 1px solid rgba(67,232,176,0.3); }
+        .btn-complete:hover { background: rgba(67,232,176,0.25); }
+        .btn-undo { background: rgba(255,107,107,0.12); color: var(--accent2); border: 1px solid rgba(255,107,107,0.25); }
+        .btn-undo:hover { background: rgba(255,107,107,0.22); }
+        .btn-edit { background: rgba(108,99,255,0.15); color: var(--accent); border: 1px solid rgba(108,99,255,0.3); }
+        .btn-edit:hover { background: rgba(108,99,255,0.25); }
+
+        .task-title {
+            font-family: 'Syne', sans-serif; font-weight: 600;
+            font-size: 15px; margin-bottom: 6px; padding-right: 120px;
+        }
+
+        .task-card.done .task-title { text-decoration: line-through; color: var(--muted); }
+
+        .task-desc { font-size: 13px; color: var(--muted); line-height: 1.5; padding-right: 80px; }
+
+        .task-meta { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+
+        .task-tag {
+            padding: 3px 10px; border-radius: 6px;
+            font-size: 11px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase;
+        }
+
+        .tag-PENDING { background: rgba(108,99,255,0.15); color: var(--accent); }
+        .tag-IN_PROGRESS { background: rgba(255,200,50,0.12); color: #ffc832; }
+        .tag-COMPLETED { background: rgba(67,232,176,0.12); color: var(--accent3); }
+        .tag-CANCELLED { background: rgba(255,107,107,0.12); color: var(--accent2); }
+
+        .task-priority { font-size: 11px; color: var(--muted); }
+        .priority-HIGH { color: var(--accent2); }
+        .priority-CRITICAL { color: #ff3b3b; font-weight: 700; }
+        .priority-LOW { color: var(--muted); }
+
+        .task-date { font-size: 11px; color: var(--muted); margin-left: auto; }
+
+        .empty-state {
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 60px 20px; color: var(--muted); text-align: center;
+        }
+
+        .empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.4; }
+        .empty-text { font-size: 14px; }
+
+        /* ─── LOADER ─── */
+        .loader {
+            display: flex; align-items: center; justify-content: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            width: 32px; height: 32px;
+            border: 2px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ─── TOAST ─── */
+        .toast {
+            position: fixed; bottom: 24px; right: 24px;
+            padding: 12px 20px; border-radius: 12px;
+            font-size: 14px; font-weight: 500;
+            background: var(--surface2); border: 1px solid var(--border);
+            z-index: 9998; transform: translateY(100px); opacity: 0;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            max-width: 300px;
+        }
+
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .toast.success { border-color: var(--accent3); color: var(--accent3); }
+        .toast.error { border-color: var(--accent2); color: var(--accent2); }
+
+        /* ─── MODAL ─── */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+            z-index: 1000; align-items: center; justify-content: center;
+        }
+
+        .modal-overlay.show { display: flex; animation: fadeIn 0.2s ease; }
+
+        .modal {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 24px; padding: 36px; width: 480px;
+            position: relative; animation: fadeUp 0.25s ease;
+        }
+
+        .modal::before {
+            content: ''; position: absolute;
+            top: -1px; left: 30px; right: 30px; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            border-radius: 2px;
+        }
+
+        .modal-title {
+            font-family: 'Syne', sans-serif; font-weight: 700;
+            font-size: 20px; margin-bottom: 24px;
+        }
+
+        .modal-close {
+            position: absolute; top: 20px; right: 20px;
+            width: 32px; height: 32px;
+            background: var(--surface2); border: 1px solid var(--border);
+            border-radius: 8px; color: var(--muted); cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; line-height: 1; transition: all 0.15s;
+        }
+
+        .modal-close:hover { color: var(--text); border-color: var(--muted); }
+
+        .form-select {
+            width: 100%; padding: 12px 16px;
+            background: var(--bg); border: 1px solid var(--border);
+            border-radius: 12px; color: var(--text);
+            font-family: 'DM Sans', sans-serif; font-size: 15px;
+            outline: none; transition: border-color 0.2s; cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b6b80' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: right 16px center;
+        }
+
+        .form-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(108,99,255,0.15); }
+        .form-select option { background: var(--surface); }
+
+        .form-textarea {
+            width: 100%; padding: 12px 16px;
+            background: var(--bg); border: 1px solid var(--border);
+            border-radius: 12px; color: var(--text);
+            font-family: 'DM Sans', sans-serif; font-size: 15px;
+            outline: none; resize: vertical; min-height: 90px;
+            transition: border-color 0.2s;
+        }
+
+        .form-textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(108,99,255,0.15); }
+
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+<!-- ─── AUTH PAGE ─── -->
+<div id="auth-page">
+    <div class="auth-glow"></div>
+    <div class="auth-card">
+        <div class="auth-logo">TASK<span>FLOW</span></div>
+        <div class="auth-subtitle">Управляй задачами без лишнего шума</div>
+
+        <div class="tab-switch">
+            <button class="tab-btn active" onclick="switchTab('login')">Войти</button>
+            <button class="tab-btn" onclick="switchTab('register')">Регистрация</button>
+        </div>
+
+        <!-- LOGIN -->
+        <div id="login-form">
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                <input id="login-email" class="form-input" type="email" placeholder="you@example.com">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Пароль</label>
+                <input id="login-pass" class="form-input" type="password" placeholder="••••••••">
+            </div>
+            <button class="btn-primary" id="login-btn" onclick="doLogin()">Войти →</button>
+            <div id="login-error" class="error-msg"></div>
+        </div>
+
+        <!-- REGISTER -->
+        <div id="register-form" style="display:none">
+            <div class="form-group">
+                <label class="form-label">Имя</label>
+                <input id="reg-name" class="form-input" type="text" placeholder="Алексей">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                <input id="reg-email" class="form-input" type="email" placeholder="you@example.com">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Пароль</label>
+                <input id="reg-pass" class="form-input" type="password" placeholder="••••••••">
+            </div>
+            <button class="btn-primary" id="register-btn" onclick="doRegister()">Создать аккаунт →</button>
+            <div id="reg-error" class="error-msg"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ─── HOME PAGE ─── -->
+<div id="home-page">
+    <header>
+        <div class="header-logo">TASK<span>FLOW</span></div>
+        <div class="header-user">
+            <div class="avatar" id="header-avatar">A</div>
+            <span id="header-name">User</span>
+        </div>
+        <button class="btn-new-task" onclick="openModal()">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            Новая задача
+        </button>
+        <button class="btn-logout" onclick="doLogout()">Выйти</button>
+    </header>
+
+    <div class="board">
+        <div class="column">
+            <div class="column-header">
+                <div class="column-dot active-dot"></div>
+                <div class="column-title">В работе</div>
+                <div class="column-count" id="active-count">0</div>
+            </div>
+            <div class="task-list" id="active-list"><div class="loader"><div class="spinner"></div></div></div>
+        </div>
+        <div class="column">
+            <div class="column-header">
+                <div class="column-dot done-dot"></div>
+                <div class="column-title">Выполнено</div>
+                <div class="column-count" id="done-count">0</div>
+            </div>
+            <div class="task-list" id="done-list"><div class="loader"><div class="spinner"></div></div></div>
+        </div>
+    </div>
+</div>
+
+<!-- ─── MODAL ─── -->
+<div class="modal-overlay" id="modal">
+    <div class="modal">
+        <div class="modal-title" id="modal-title">Новая задача</div>
+        <button class="modal-close" onclick="closeModal()">×</button>
+
+        <div class="form-group">
+            <label class="form-label">Название</label>
+            <input id="task-title-input" class="form-input" type="text" placeholder="Что нужно сделать?">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Описание</label>
+            <textarea id="task-desc-input" class="form-textarea" placeholder="Подробности..."></textarea>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Статус</label>
+                <select id="task-status-input" class="form-select">
+                    <option value="PENDING">⏳ Ожидает</option>
+                    <option value="IN_PROGRESS">🔄 В процессе</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Приоритет</label>
+                <select id="task-priority-input" class="form-select">
+                    <option value="LOW">🟢 Низкий</option>
+                    <option value="MEDIUM" selected>🟡 Средний</option>
+                    <option value="HIGH">🟠 Высокий</option>
+                    <option value="CRITICAL">🔴 Критический</option>
+                </select>
+            </div>
+        </div>
+        <button class="btn-primary" id="modal-save-btn" onclick="saveTask()">Сохранить задачу →</button>
+    </div>
+</div>
+
+<!-- ─── TOAST ─── -->
+<div class="toast" id="toast"></div>
+
+<script>
+    // ─── CONFIG ───
+    // Все запросы идут через nginx:
+    //   /api/auth/**  → nginx → api-gateway:8080 → auth-service:8081
+    //   /api/tasks/** → nginx → api-gateway:8080 → task-service:8082
+    const API = '/api';
+
+    // ─── STATE ───
+    let token = sessionStorage.getItem('tf_token');
+    let currentUser = JSON.parse(sessionStorage.getItem('tf_user') || 'null');
+    let editingTaskId = null;
+
+    // ─── JWT PARSER ───
+    // Вытаскиваем email/sub из payload токена без лишнего запроса к серверу
+    function parseJwt(t) {
+        try {
+            const payload = JSON.parse(atob(t.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+            return { email: payload.sub || payload.email, id: payload.userId || payload.id };
+        } catch (_) { return {}; }
+    }
+
+    // ─── TOAST ───
+    function showToast(msg, type = 'success') {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.className = `toast ${type} show`;
+        setTimeout(() => { t.classList.remove('show'); }, 3000);
+    }
+
+    // ─── API HELPER ───
+    async function apiCall(path, options = {}) {
+        const headers = { 'Content-Type': 'application/json', ...options.headers };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const res = await fetch(`${API}${path}`, { ...options, headers });
+
+        if (res.status === 401) { doLogout(); throw new Error('Unauthorized'); }
+
+        if (!res.ok) {
+            let errMsg = `Ошибка ${res.status}`;
+            try {
+                const err = await res.json();
+                errMsg = err.message || err.error || errMsg;
+            } catch (_) {}
+            throw new Error(errMsg);
+        }
+
+        if (res.status === 204) return null;
+        return res.json();
+    }
+
+    // ─── AUTH ───
+    function switchTab(tab) {
+        document.querySelectorAll('.tab-btn').forEach((b, i) =>
+            b.classList.toggle('active', tab === 'login' ? i === 0 : i === 1));
+        document.getElementById('login-form').style.display = tab === 'login' ? 'block' : 'none';
+        document.getElementById('register-form').style.display = tab === 'register' ? 'block' : 'none';
+    }
+
+    function showError(id, msg) {
+        const el = document.getElementById(id);
+        el.textContent = msg; el.classList.add('show');
+    }
+
+    function clearError(id) { document.getElementById(id).classList.remove('show'); }
+
+    async function doLogin() {
+        const email = document.getElementById('login-email').value.trim();
+        const pass  = document.getElementById('login-pass').value;
+        clearError('login-error');
+        if (!email || !pass) { showError('login-error', 'Заполните все поля'); return; }
+
+        const btn = document.getElementById('login-btn');
+        btn.disabled = true; btn.textContent = 'Входим...';
+        try {
+            // POST /api/auth/login → gateway → auth-service
+            // Ответ: { token: "eyJ..." }
+            const data = await apiCall('/auth/login', {
+                method: 'POST',
+                body: JSON.stringify({ email, password: pass })
+            });
+            token = data.token;
+            sessionStorage.setItem('tf_token', token);
+            currentUser = { ...parseJwt(token), email };
+            sessionStorage.setItem('tf_user', JSON.stringify(currentUser));
+            showHome();
+        } catch (e) {
+            showError('login-error', e.message.includes('401') || e.message.includes('Unauthorized')
+                ? 'Неверный email или пароль' : e.message);
+        } finally {
+            btn.disabled = false; btn.textContent = 'Войти →';
+        }
+    }
+
+    async function doRegister() {
+        const name  = document.getElementById('reg-name').value.trim();
+        const email = document.getElementById('reg-email').value.trim();
+        const pass  = document.getElementById('reg-pass').value;
+        clearError('reg-error');
+        if (!name || !email || !pass) { showError('reg-error', 'Заполните все поля'); return; }
+        if (pass.length < 6) { showError('reg-error', 'Пароль минимум 6 символов'); return; }
+
+        const btn = document.getElementById('register-btn');
+        btn.disabled = true; btn.textContent = 'Создаём аккаунт...';
+        try {
+            // POST /api/auth/register → gateway → auth-service
+            // Ответ: { token: "eyJ..." }
+            const data = await apiCall('/auth/register', {
+                method: 'POST',
+                body: JSON.stringify({ name, email, password: pass })
+            });
+            token = data.token;
+            sessionStorage.setItem('tf_token', token);
+            currentUser = { ...parseJwt(token), name, email };
+            sessionStorage.setItem('tf_user', JSON.stringify(currentUser));
+            showToast('Добро пожаловать, ' + name + '!');
+            showHome();
+        } catch (e) {
+            showError('reg-error', e.message.includes('409') ? 'Email уже занят' : e.message);
+        } finally {
+            btn.disabled = false; btn.textContent = 'Создать аккаунт →';
+        }
+    }
+
+    function doLogout() {
+        token = null; currentUser = null;
+        sessionStorage.removeItem('tf_token');
+        sessionStorage.removeItem('tf_user');
+        document.getElementById('home-page').style.display = 'none';
+        document.getElementById('auth-page').style.display = 'flex';
+    }
+
+    // ─── HOME ───
+    function showHome() {
+        document.getElementById('auth-page').style.display = 'none';
+        document.getElementById('home-page').style.display = 'flex';
+        const displayName = currentUser?.name || currentUser?.email || 'User';
+        document.getElementById('header-name').textContent = displayName;
+        document.getElementById('header-avatar').textContent = displayName[0].toUpperCase();
+        loadTasks();
+    }
+
+    async function loadTasks() {
+        document.getElementById('active-list').innerHTML = '<div class="loader"><div class="spinner"></div></div>';
+        document.getElementById('done-list').innerHTML   = '<div class="loader"><div class="spinner"></div></div>';
+        try {
+            // GET /api/tasks → gateway → task-service
+            // Ответ: TaskResponse[]
+            const tasks = await apiCall('/tasks');
+            renderTasks(Array.isArray(tasks) ? tasks : []);
+        } catch (e) {
+            document.getElementById('active-list').innerHTML =
+                '<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-text">Не удалось загрузить задачи</div></div>';
+            document.getElementById('done-list').innerHTML = '';
+            showToast('Ошибка: ' + e.message, 'error');
+        }
+    }
+
+    function renderTasks(tasks) {
+        const active = tasks.filter(t => t.status !== 'COMPLETED' && t.status !== 'CANCELLED');
+        const done   = tasks.filter(t => t.status === 'COMPLETED' || t.status === 'CANCELLED');
+
+        document.getElementById('active-count').textContent = active.length;
+        document.getElementById('done-count').textContent   = done.length;
+
+        document.getElementById('active-list').innerHTML =
+            active.length ? active.map(taskHTML).join('') : emptyState('🌀', 'Задач пока нет');
+        document.getElementById('done-list').innerHTML =
+            done.length ? done.map(taskHTML).join('') : emptyState('✅', 'Выполненных задач нет');
+    }
+
+    function taskHTML(t) {
+        const isDone = t.status === 'COMPLETED' || t.status === 'CANCELLED';
+        const date = t.createdAt
+            ? new Date(t.createdAt).toLocaleDateString('ru', { day: 'numeric', month: 'short' })
+            : '';
+
+        const statusLabels   = { PENDING: '⏳ Ожидает', IN_PROGRESS: '🔄 В процессе', COMPLETED: '✅ Готово', CANCELLED: '❌ Отменено' };
+        const priorityLabels = { LOW: 'Низкий', MEDIUM: 'Средний', HIGH: 'Высокий', CRITICAL: '🔴 Критический' };
+
+        // Используем PATCH /api/tasks/{id}/complete и /incomplete
+        const actions = isDone
+            ? `<button class="action-btn btn-undo"     onclick="markIncomplete('${t.id}');event.stopPropagation()">↩ Вернуть</button>
+         <button class="action-btn btn-edit"     onclick="openEditModal('${t.id}');event.stopPropagation()">✎ Изменить</button>`
+            : `<button class="action-btn btn-complete" onclick="markComplete('${t.id}');event.stopPropagation()">✓ Готово</button>
+         <button class="action-btn btn-edit"     onclick="openEditModal('${t.id}');event.stopPropagation()">✎ Изменить</button>`;
+
+        const tagsHtml = (t.tags || []).map(tag =>
+            `<span class="task-tag tag-PENDING">${escHtml(tag)}</span>`).join('');
+
+        return `
+      <div class="task-card ${isDone ? 'done' : ''}">
+        <div class="task-actions">${actions}</div>
+        <div class="task-title">${escHtml(t.title)}</div>
+        ${t.description ? `<div class="task-desc">${escHtml(t.description)}</div>` : ''}
+        <div class="task-meta">
+          <span class="task-tag tag-${t.status}">${statusLabels[t.status] || t.status}</span>
+          ${tagsHtml}
+          <span class="task-priority priority-${t.priority}">${priorityLabels[t.priority] || ''}</span>
+          <span class="task-date">${date}</span>
+        </div>
+      </div>`;
+    }
+
+    function emptyState(icon, text) {
+        return `<div class="empty-state"><div class="empty-icon">${icon}</div><div class="empty-text">${text}</div></div>`;
+    }
+
+    function escHtml(s) {
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    // ─── TASK ACTIONS ───
+
+    // PATCH /api/tasks/{id}/complete → status=COMPLETED, completedAt=now()
+    async function markComplete(id) {
+        try {
+            await apiCall(`/tasks/${id}/complete`, { method: 'PATCH' });
+            showToast('Задача выполнена ✓');
+            loadTasks();
+        } catch (e) { showToast('Ошибка: ' + e.message, 'error'); }
+    }
+
+    // PATCH /api/tasks/{id}/incomplete → status=IN_PROGRESS
+    async function markIncomplete(id) {
+        try {
+            await apiCall(`/tasks/${id}/incomplete`, { method: 'PATCH' });
+            showToast('Задача возвращена в работу');
+            loadTasks();
+        } catch (e) { showToast('Ошибка: ' + e.message, 'error'); }
+    }
+
+    // DELETE /api/tasks/{id}
+    async function deleteTask(id) {
+        if (!confirm('Удалить задачу?')) return;
+        try {
+            await apiCall(`/tasks/${id}`, { method: 'DELETE' });
+            showToast('Задача удалена');
+            loadTasks();
+        } catch (e) { showToast('Ошибка: ' + e.message, 'error'); }
+    }
+
+    // ─── MODAL ───
+    async function openEditModal(id) {
+        try {
+            // GET /api/tasks/{id} → gateway → task-service
+            const task = await apiCall(`/tasks/${id}`);
+            openModal(task);
+        } catch (e) { showToast('Ошибка загрузки задачи', 'error'); }
+    }
+
+    function openModal(task = null) {
+        editingTaskId = task ? task.id : null;
+        document.getElementById('modal-title').textContent     = task ? 'Изменить задачу' : 'Новая задача';
+        document.getElementById('modal-save-btn').textContent  = task ? 'Сохранить изменения →' : 'Сохранить задачу →';
+        document.getElementById('task-title-input').value      = task?.title || '';
+        document.getElementById('task-desc-input').value       = task?.description || '';
+        document.getElementById('task-priority-input').value   = task?.priority || 'MEDIUM';
+
+        const statusSelect = document.getElementById('task-status-input');
+        if (task) {
+            statusSelect.innerHTML = `
+        <option value="PENDING">⏳ Ожидает</option>
+        <option value="IN_PROGRESS">🔄 В процессе</option>
+        <option value="COMPLETED">✅ Готово</option>
+        <option value="CANCELLED">❌ Отменено</option>`;
+            statusSelect.value = task.status;
+        } else {
+            statusSelect.innerHTML = `
+        <option value="PENDING">⏳ Ожидает</option>
+        <option value="IN_PROGRESS">🔄 В процессе</option>`;
+        }
+
+        document.getElementById('modal').classList.add('show');
+        setTimeout(() => document.getElementById('task-title-input').focus(), 100);
+    }
+
+    function closeModal() {
+        document.getElementById('modal').classList.remove('show');
+        editingTaskId = null;
+    }
+
+    async function saveTask() {
+        const title = document.getElementById('task-title-input').value.trim();
+        if (!title) { document.getElementById('task-title-input').focus(); return; }
+
+        const btn = document.getElementById('modal-save-btn');
+        btn.disabled = true; btn.textContent = 'Сохраняем...';
+
+        try {
+            if (editingTaskId) {
+                // PUT /api/tasks/{id} → gateway → task-service (UpdateTaskRequest: все поля)
+                const payload = {
+                    title,
+                    description: document.getElementById('task-desc-input').value.trim() || null,
+                    status:      document.getElementById('task-status-input').value,
+                    priority:    document.getElementById('task-priority-input').value,
+                    tags:        [],
+                    dueDate:     null
+                };
+                await apiCall(`/tasks/${editingTaskId}`, { method: 'PUT', body: JSON.stringify(payload) });
+                showToast('Задача обновлена');
+            } else {
+                // POST /api/tasks → gateway → task-service (CreateTaskRequest)
+                // userId НЕ передаём — task-service берёт из JWT
+                const payload = {
+                    title,
+                    description: document.getElementById('task-desc-input').value.trim() || null,
+                    priority:    document.getElementById('task-priority-input').value,
+                    tags:        [],
+                    dueDate:     null
+                };
+                await apiCall('/tasks', { method: 'POST', body: JSON.stringify(payload) });
+                showToast('Задача создана');
+            }
+            closeModal();
+            loadTasks();
+        } catch (e) {
+            showToast('Ошибка: ' + e.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = editingTaskId ? 'Сохранить изменения →' : 'Сохранить задачу →';
+        }
+    }
+
+    // ─── EVENTS ───
+    document.getElementById('modal').addEventListener('click', e => {
+        if (e.target === document.getElementById('modal')) closeModal();
+    });
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeModal();
+        if (e.key === 'Enter'
+            && document.getElementById('modal').classList.contains('show')
+            && e.target.id === 'task-title-input') saveTask();
+    });
+    document.getElementById('login-pass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+    document.getElementById('reg-pass').addEventListener('keydown',   e => { if (e.key === 'Enter') doRegister(); });
+
+    // ─── INIT ───
+    if (token && currentUser) showHome();
+</script>
+</body>
+</html>

@@ -1,8 +1,8 @@
 FROM gradle:8.5-jdk17 AS build
 WORKDIR /app
 COPY . .
-RUN --mount=type=cache,target=/root/.gradle \
-    gradle :api-gateway:bootJar --no-daemon
+RUN --mount=type=cache,target=/root/.gradle-gateway \
+    GRADLE_USER_HOME=/root/.gradle-gateway gradle :api-gateway:bootJar --no-daemon
 
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
