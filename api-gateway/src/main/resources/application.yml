@@ -18,14 +18,14 @@ spring:
         - id: auth-service
           uri: ${AUTH_SERVICE_URL:http://localhost:8081}
           predicates:
-            - Path=/auth/**
+            - Path=/api/auth/**
           filters:
             - StripPrefix=0
 
         - id: task-service
           uri: ${TASK_SERVICE_URL:http://localhost:8082}
           predicates:
-            - Path=/tasks/**
+            - Path=/api/tasks/**
           filters:
             - StripPrefix=0
 
@@ -33,6 +33,7 @@ spring:
         cors-configurations:
           '[/**]':
             allowedOrigins:
+              - "http://localhost"
               - "http://localhost:3000"
               - "http://localhost:5173"
             allowedMethods:
