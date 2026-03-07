@@ -20,8 +20,8 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
     private final JwtService jwtService;
 
     private static final List<String> PUBLIC_PATHS = List.of(
-            "/auth/sign-up",
-            "/auth/sign-in"
+            "/api/auth/sign-up",
+            "/api/auth/sign-in"
     );
 
     @Override

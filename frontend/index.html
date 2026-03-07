@@ -612,20 +612,22 @@
         const btn = document.getElementById('login-btn');
         btn.disabled = true; btn.textContent = 'Входим...';
         try {
-            // POST /api/auth/login → gateway → auth-service
-            // Ответ: { token: "eyJ..." }
-            const data = await apiCall('/auth/login', {
+            const res = await fetch(`${API}/auth/sign-in`, {
                 method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password: pass })
             });
-            token = data.token;
+            if (!res.ok) throw new Error('Неверный email или пароль');
+
+            token = res.headers.get('Authorization')?.replace('Bearer ', '');
+            if (!token) throw new Error('Токен не получен');
+
             sessionStorage.setItem('tf_token', token);
             currentUser = { ...parseJwt(token), email };
             sessionStorage.setItem('tf_user', JSON.stringify(currentUser));
             showHome();
         } catch (e) {
-            showError('login-error', e.message.includes('401') || e.message.includes('Unauthorized')
-                ? 'Неверный email или пароль' : e.message);
+            showError('login-error', e.message);
         } finally {
             btn.disabled = false; btn.textContent = 'Войти →';
         }
@@ -642,20 +644,35 @@
         const btn = document.getElementById('register-btn');
         btn.disabled = true; btn.textContent = 'Создаём аккаунт...';
         try {
-            // POST /api/auth/register → gateway → auth-service
-            // Ответ: { token: "eyJ..." }
-            const data = await apiCall('/auth/register', {
+            // 1. Регистрация
+            const regRes = await fetch(`${API}/auth/sign-up`, {
                 method: 'POST',
-                body: JSON.stringify({ name, email, password: pass })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password: pass })
             });
-            token = data.token;
+            if (!regRes.ok) {
+                const err = await regRes.json().catch(() => ({}));
+                throw new Error(regRes.status === 409 ? 'Email уже занят' : (err.message || `Ошибка ${regRes.status}`));
+            }
+
+            // 2. Автологин после регистрации
+            const loginRes = await fetch(`${API}/auth/sign-in`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password: pass })
+            });
+            if (!loginRes.ok) throw new Error('Зарегистрировались, но не удалось войти');
+
+            token = loginRes.headers.get('Authorization')?.replace('Bearer ', '');
+            if (!token) throw new Error('Токен не получен');
+
             sessionStorage.setItem('tf_token', token);
             currentUser = { ...parseJwt(token), name, email };
             sessionStorage.setItem('tf_user', JSON.stringify(currentUser));
             showToast('Добро пожаловать, ' + name + '!');
             showHome();
         } catch (e) {
-            showError('reg-error', e.message.includes('409') ? 'Email уже занят' : e.message);
+            showError('reg-error', e.message);
         } finally {
             btn.disabled = false; btn.textContent = 'Создать аккаунт →';
         }

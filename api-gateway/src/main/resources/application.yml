@@ -18,14 +18,14 @@ spring:
         - id: auth-service
           uri: ${AUTH_SERVICE_URL:http://localhost:8081}
           predicates:
-            - Path=/api/auth/**
+            - Path=/api/auth,/api/auth/**
           filters:
             - StripPrefix=0
 
         - id: task-service
           uri: ${TASK_SERVICE_URL:http://localhost:8082}
           predicates:
-            - Path=/api/tasks/**
+            - Path=/api/tasks,/api/tasks/**
           filters:
             - StripPrefix=0
 
@@ -52,3 +52,8 @@ application:
   security:
     jwt:
       secret-key: ${JWT_SECRET:mySecretKeyForJWTTokenGenerationAndValidation123456789}
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    reactor.netty.http.client: DEBUG
