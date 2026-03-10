@@ -4,6 +4,7 @@ import com.example.taskservice.document.Task;
 import com.example.taskservice.document.TaskStatus;
 import com.example.taskservice.dto.CreateTaskRequest;
 import com.example.taskservice.dto.TaskResponse;
+import com.example.taskservice.dto.UpdateTaskRequest;
 import com.example.taskservice.exception.TaskNotFoundException;
 import com.example.taskservice.mapper.TaskMapper;
 import com.example.taskservice.repository.TaskRepository;
@@ -34,11 +35,12 @@ public class TaskService {
         return taskMapper.toTaskResponse(saved);
     }
 
-    public TaskResponse updateTask(String id, CreateTaskRequest request, Long userId) {
+    public TaskResponse updateTask(String id, UpdateTaskRequest request, Long userId) {
         Task task = taskRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new TaskNotFoundException("Task not found: " + id));
         task.setTitle(request.title());
         task.setDescription(request.description());
+        task.setPriority(request.priority());
         Task saved = taskRepository.save(task);
         return  taskMapper.toTaskResponse(saved);
     }

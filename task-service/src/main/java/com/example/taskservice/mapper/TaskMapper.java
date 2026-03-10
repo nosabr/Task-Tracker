@@ -16,6 +16,7 @@ public class TaskMapper {
                 task.getId(),
                 task.getTitle(),
                 task.getDescription(),
+                task.getPriority().toString(),
                 task.getStatus().toString(),
                 task.getUserId(),
                 task.getEmail(),
@@ -28,6 +29,7 @@ public class TaskMapper {
         return Task.builder()
                 .title(request.title())
                 .description(request.description())
+                .priority(request.priority())
                 .userId(userId)
                 .email(email)
                 .build();

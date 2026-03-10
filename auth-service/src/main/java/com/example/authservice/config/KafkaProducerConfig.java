@@ -1,5 +1,4 @@
-package com.example.scheduler.config;
-
+package com.example.authservice.config;
 
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -28,7 +27,8 @@ public class KafkaProducerConfig {
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
         props.put(JsonSerializer.ADD_TYPE_INFO_HEADERS, true);
         props.put(JsonSerializer.TYPE_MAPPINGS,
-                "dailyReport:com.example.scheduler.dto.DailyReportEvent");
+                "userRegistered:com.example.authservice.event.UserRegisterEvent," +
+                        "userDeleted:com.example.authservice.event.UserDeletedEvent");
         return new DefaultKafkaProducerFactory<>(props);
     }
 

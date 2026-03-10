@@ -26,6 +26,9 @@ public class Task {
     @Builder.Default
     private TaskStatus status = TaskStatus.IN_PROGRESS;
 
+    @Builder.Default
+    private TaskPriority priority = TaskPriority.MEDIUM;
+
     @Indexed
     private Long userId;
 

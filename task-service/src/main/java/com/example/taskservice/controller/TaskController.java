@@ -2,6 +2,7 @@ package com.example.taskservice.controller;
 
 import com.example.taskservice.dto.CreateTaskRequest;
 import com.example.taskservice.dto.TaskResponse;
+import com.example.taskservice.dto.UpdateTaskRequest;
 import com.example.taskservice.service.TaskService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -39,7 +40,7 @@ public class TaskController {
 
     @PutMapping("/{id}")
     public ResponseEntity<TaskResponse> updateTask(
-            @Valid @RequestBody CreateTaskRequest request,
+            @Valid @RequestBody UpdateTaskRequest request,
             @PathVariable String id,
             @RequestHeader("X-User-Id") Long userId) {
         return ResponseEntity.ok(taskService.updateTask(id, request, userId));

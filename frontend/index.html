@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TASKFLOW</title>
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg: #0a0a0f;
@@ -300,9 +300,10 @@
         .tag-CANCELLED { background: rgba(255,107,107,0.12); color: var(--accent2); }
 
         .task-priority { font-size: 11px; color: var(--muted); }
-        .priority-HIGH { color: var(--accent2); }
+        .priority-LOW      { color: var(--muted); }
+        .priority-MEDIUM   { color: #ffc832; }
+        .priority-HIGH     { color: #ff9500; }
         .priority-CRITICAL { color: #ff3b3b; font-weight: 700; }
-        .priority-LOW { color: var(--muted); }
 
         .task-date { font-size: 11px; color: var(--muted); margin-left: auto; }
 
@@ -409,8 +410,6 @@
 
         .form-textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(108,99,255,0.15); }
 
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
         @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
@@ -512,23 +511,14 @@
             <label class="form-label">Описание</label>
             <textarea id="task-desc-input" class="form-textarea" placeholder="Подробности..."></textarea>
         </div>
-        <div class="form-row">
-            <div class="form-group">
-                <label class="form-label">Статус</label>
-                <select id="task-status-input" class="form-select">
-                    <option value="PENDING">⏳ Ожидает</option>
-                    <option value="IN_PROGRESS">🔄 В процессе</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Приоритет</label>
-                <select id="task-priority-input" class="form-select">
-                    <option value="LOW">🟢 Низкий</option>
-                    <option value="MEDIUM" selected>🟡 Средний</option>
-                    <option value="HIGH">🟠 Высокий</option>
-                    <option value="CRITICAL">🔴 Критический</option>
-                </select>
-            </div>
+        <div class="form-group">
+            <label class="form-label">Приоритет</label>
+            <select id="task-priority-input" class="form-select">
+                <option value="LOW">🟢 Низкий</option>
+                <option value="MEDIUM" selected>🟡 Средний</option>
+                <option value="HIGH">🟠 Высокий</option>
+                <option value="CRITICAL">🔴 Критический</option>
+            </select>
         </div>
         <button class="btn-primary" id="modal-save-btn" onclick="saveTask()">Сохранить задачу →</button>
     </div>
@@ -539,9 +529,6 @@
 
 <script>
     // ─── CONFIG ───
-    // Все запросы идут через nginx:
-    //   /api/auth/**  → nginx → api-gateway:8080 → auth-service:8081
-    //   /api/tasks/** → nginx → api-gateway:8080 → task-service:8082
     const API = '/api';
 
     // ─── STATE ───
@@ -550,7 +537,6 @@
     let editingTaskId = null;
 
     // ─── JWT PARSER ───
-    // Вытаскиваем email/sub из payload токена без лишнего запроса к серверу
     function parseJwt(t) {
         try {
             const payload = JSON.parse(atob(t.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
@@ -644,7 +630,6 @@
         const btn = document.getElementById('register-btn');
         btn.disabled = true; btn.textContent = 'Создаём аккаунт...';
         try {
-            // 1. Регистрация
             const regRes = await fetch(`${API}/auth/sign-up`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -655,7 +640,6 @@
                 throw new Error(regRes.status === 409 ? 'Email уже занят' : (err.message || `Ошибка ${regRes.status}`));
             }
 
-            // 2. Автологин после регистрации
             const loginRes = await fetch(`${API}/auth/sign-in`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -700,8 +684,6 @@
         document.getElementById('active-list').innerHTML = '<div class="loader"><div class="spinner"></div></div>';
         document.getElementById('done-list').innerHTML   = '<div class="loader"><div class="spinner"></div></div>';
         try {
-            // GET /api/tasks → gateway → task-service
-            // Ответ: TaskResponse[]
             const tasks = await apiCall('/tasks');
             renderTasks(Array.isArray(tasks) ? tasks : []);
         } catch (e) {
@@ -734,28 +716,22 @@
         const statusLabels   = { PENDING: '⏳ Ожидает', IN_PROGRESS: '🔄 В процессе', COMPLETED: '✅ Готово', CANCELLED: '❌ Отменено' };
         const priorityLabels = { LOW: 'Низкий', MEDIUM: 'Средний', HIGH: 'Высокий', CRITICAL: '🔴 Критический' };
 
-        // Используем PATCH /api/tasks/{id}/complete и /incomplete
         const actions = isDone
             ? `<button class="action-btn btn-undo"     onclick="markIncomplete('${t.id}');event.stopPropagation()">↩ Вернуть</button>
-         <button class="action-btn btn-edit"     onclick="openEditModal('${t.id}');event.stopPropagation()">✎ Изменить</button>`
+               <button class="action-btn btn-edit"     onclick="openEditModal('${t.id}');event.stopPropagation()">✎ Изменить</button>`
             : `<button class="action-btn btn-complete" onclick="markComplete('${t.id}');event.stopPropagation()">✓ Готово</button>
-         <button class="action-btn btn-edit"     onclick="openEditModal('${t.id}');event.stopPropagation()">✎ Изменить</button>`;
-
-        const tagsHtml = (t.tags || []).map(tag =>
-            `<span class="task-tag tag-PENDING">${escHtml(tag)}</span>`).join('');
+               <button class="action-btn btn-edit"     onclick="openEditModal('${t.id}');event.stopPropagation()">✎ Изменить</button>`;
 
         return `
-      <div class="task-card ${isDone ? 'done' : ''}">
-        <div class="task-actions">${actions}</div>
-        <div class="task-title">${escHtml(t.title)}</div>
-        ${t.description ? `<div class="task-desc">${escHtml(t.description)}</div>` : ''}
-        <div class="task-meta">
-          <span class="task-tag tag-${t.status}">${statusLabels[t.status] || t.status}</span>
-          ${tagsHtml}
-          <span class="task-priority priority-${t.priority}">${priorityLabels[t.priority] || ''}</span>
-          <span class="task-date">${date}</span>
-        </div>
-      </div>`;
+        <div class="task-card ${isDone ? 'done' : ''}">
+            <div class="task-actions">${actions}</div>
+            <div class="task-title">${escHtml(t.title)}</div>
+            ${t.description ? `<div class="task-desc">${escHtml(t.description)}</div>` : ''}
+            <div class="task-meta">
+                <span class="task-priority priority-${t.priority}">${priorityLabels[t.priority] || ''}</span>
+                <span class="task-date">${date}</span>
+            </div>
+        </div>`;
     }
 
     function emptyState(icon, text) {
@@ -767,8 +743,6 @@
     }
 
     // ─── TASK ACTIONS ───
-
-    // PATCH /api/tasks/{id}/complete → status=COMPLETED, completedAt=now()
     async function markComplete(id) {
         try {
             await apiCall(`/tasks/${id}/complete`, { method: 'PATCH' });
@@ -777,7 +751,6 @@
         } catch (e) { showToast('Ошибка: ' + e.message, 'error'); }
     }
 
-    // PATCH /api/tasks/{id}/incomplete → status=IN_PROGRESS
     async function markIncomplete(id) {
         try {
             await apiCall(`/tasks/${id}/incomplete`, { method: 'PATCH' });
@@ -786,7 +759,6 @@
         } catch (e) { showToast('Ошибка: ' + e.message, 'error'); }
     }
 
-    // DELETE /api/tasks/{id}
     async function deleteTask(id) {
         if (!confirm('Удалить задачу?')) return;
         try {
@@ -799,7 +771,6 @@
     // ─── MODAL ───
     async function openEditModal(id) {
         try {
-            // GET /api/tasks/{id} → gateway → task-service
             const task = await apiCall(`/tasks/${id}`);
             openModal(task);
         } catch (e) { showToast('Ошибка загрузки задачи', 'error'); }
@@ -807,25 +778,11 @@
 
     function openModal(task = null) {
         editingTaskId = task ? task.id : null;
-        document.getElementById('modal-title').textContent     = task ? 'Изменить задачу' : 'Новая задача';
-        document.getElementById('modal-save-btn').textContent  = task ? 'Сохранить изменения →' : 'Сохранить задачу →';
-        document.getElementById('task-title-input').value      = task?.title || '';
-        document.getElementById('task-desc-input').value       = task?.description || '';
-        document.getElementById('task-priority-input').value   = task?.priority || 'MEDIUM';
-
-        const statusSelect = document.getElementById('task-status-input');
-        if (task) {
-            statusSelect.innerHTML = `
-        <option value="PENDING">⏳ Ожидает</option>
-        <option value="IN_PROGRESS">🔄 В процессе</option>
-        <option value="COMPLETED">✅ Готово</option>
-        <option value="CANCELLED">❌ Отменено</option>`;
-            statusSelect.value = task.status;
-        } else {
-            statusSelect.innerHTML = `
-        <option value="PENDING">⏳ Ожидает</option>
-        <option value="IN_PROGRESS">🔄 В процессе</option>`;
-        }
+        document.getElementById('modal-title').textContent    = task ? 'Изменить задачу' : 'Новая задача';
+        document.getElementById('modal-save-btn').textContent = task ? 'Сохранить изменения →' : 'Сохранить задачу →';
+        document.getElementById('task-title-input').value     = task?.title || '';
+        document.getElementById('task-desc-input').value      = task?.description || '';
+        document.getElementById('task-priority-input').value  = task?.priority || 'MEDIUM';
 
         document.getElementById('modal').classList.add('show');
         setTimeout(() => document.getElementById('task-title-input').focus(), 100);
@@ -843,29 +800,19 @@
         const btn = document.getElementById('modal-save-btn');
         btn.disabled = true; btn.textContent = 'Сохраняем...';
 
+        const payload = {
+            title,
+            description: document.getElementById('task-desc-input').value.trim() || null,
+            priority:    document.getElementById('task-priority-input').value,
+            tags:        [],
+            dueDate:     null
+        };
+
         try {
             if (editingTaskId) {
-                // PUT /api/tasks/{id} → gateway → task-service (UpdateTaskRequest: все поля)
-                const payload = {
-                    title,
-                    description: document.getElementById('task-desc-input').value.trim() || null,
-                    status:      document.getElementById('task-status-input').value,
-                    priority:    document.getElementById('task-priority-input').value,
-                    tags:        [],
-                    dueDate:     null
-                };
                 await apiCall(`/tasks/${editingTaskId}`, { method: 'PUT', body: JSON.stringify(payload) });
                 showToast('Задача обновлена');
             } else {
-                // POST /api/tasks → gateway → task-service (CreateTaskRequest)
-                // userId НЕ передаём — task-service берёт из JWT
-                const payload = {
-                    title,
-                    description: document.getElementById('task-desc-input').value.trim() || null,
-                    priority:    document.getElementById('task-priority-input').value,
-                    tags:        [],
-                    dueDate:     null
-                };
                 await apiCall('/tasks', { method: 'POST', body: JSON.stringify(payload) });
                 showToast('Задача создана');
             }

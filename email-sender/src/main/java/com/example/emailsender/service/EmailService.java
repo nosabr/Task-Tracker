@@ -19,7 +19,7 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
 
-    @Value("${spring.mail.username}")
+    @Value("${mail.from}")
     private String fromEmail;
 
     public void sendWelcomeEmail(String to) {
@@ -78,7 +78,6 @@ public class EmailService {
                             <tr style="background-color: #4A90E2; color: white;">
                                 <th style="padding: 8px; text-align: left;">Title</th>
                                 <th style="padding: 8px; text-align: left;">Status</th>
-                                <th style="padding: 8px; text-align: left;">Due Date</th>
                             </tr>
                         </thead>
                         <tbody>

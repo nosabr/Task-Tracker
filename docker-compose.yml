@@ -121,6 +121,7 @@ services:
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       MAIL_USERNAME: ${MAILJET_API_KEY}
       MAIL_PASSWORD: ${MAILJET_API_SECRET}
+      MAIL_FROM: ${MAIL_FROM}
     depends_on:
       - kafka
     networks:
@@ -135,6 +136,7 @@ services:
     environment:
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       TASK_SERVICE_URL: http://task-service:8082
+      DAILY_REPORT_CRON: "0 0 8 * * *"
     depends_on:
       - kafka
       - task-service
