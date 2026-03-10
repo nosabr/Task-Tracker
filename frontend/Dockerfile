@@ -2,9 +2,9 @@ FROM nginx:1.25-alpine
 
 RUN rm /etc/nginx/conf.d/default.conf
 
-COPY nginx.conf /etc/nginx/conf.d/taskflow.conf
+COPY frontend/nginx.conf /etc/nginx/conf.d/taskflow.conf
 
-COPY index.html /usr/share/nginx/html/index.html
+COPY frontend/index.html /usr/share/nginx/html/index.html
 
 RUN chown -R nginx:nginx /usr/share/nginx/html && \
     chmod -R 755 /usr/share/nginx/html
